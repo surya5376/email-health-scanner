@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Health Scanner — Domain Deliverability Audit</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8f7f4;
+      --surface: #ffffff;
+      --border: rgba(0,0,0,0.1);
+      --text: #1a1a18;
+      --muted: #6b6b66;
+      --pass: #0f6e56;
+      --pass-bg: #e1f5ee;
+      --warn: #854f0b;
+      --warn-bg: #faeeda;
+      --fail: #a32d2d;
+      --fail-bg: #fcebeb;
+      --blue: #185fa5;
+      --blue-bg: #e6f1fb;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 30px;
+      height: 30px;
+      background: var(--text);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon svg { width: 16px; height: 16px; fill: white; }
+
+    .nav-link {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-link:hover { background: var(--bg); color: var(--text); }
+
+    main { max-width: 760px; margin: 0 auto; padding: 3rem 1.5rem; }
+
+    .hero { text-align: center; margin-bottom: 2.5rem; }
+    .hero h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 0.5rem; }
+    .hero p { font-size: 15px; color: var(--muted); }
+
+    .scan-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      display: flex;
+      gap: 10px;
+      margin-bottom: 2rem;
+    }
+
+    .scan-box input {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 1rem;
+      font-size: 15px;
+      outline: none;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.15s;
+    }
+
+    .scan-box input:focus { border-color: var(--text); }
+
+    .scan-box input::placeholder { color: var(--muted); }
+
+    .btn {
+      background: var(--text);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 1.4rem;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .examples {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .example-btn {
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .example-btn:hover { color: var(--text); border-color: var(--text); }
+
+    #loading {
+      display: none;
+      text-align: center;
+      padding: 3rem 0;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--text);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #loading p { color: var(--muted); font-size: 14px; }
+
+    #results { display: none; }
+
+    .grade-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .grade-circle {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      border: 4px solid;
+    }
+
+    .grade-A { color: var(--pass); border-color: var(--pass); background: var(--pass-bg); }
+    .grade-B { color: #185fa5; border-color: #185fa5; background: var(--blue-bg); }
+    .grade-C { color: #854f0b; border-color: #854f0b; background: var(--warn-bg); }
+    .grade-D { color: #993c1d; border-color: #993c1d; background: #faece7; }
+    .grade-F { color: var(--fail); border-color: var(--fail); background: var(--fail-bg); }
+
+    .grade-info h2 { font-size: 1.2rem; font-weight: 600; margin-bottom: 4px; }
+    .grade-info .domain-name { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+    .grade-info .summary { font-size: 14px; color: var(--muted); line-height: 1.5; }
+
+    .score-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .score-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.8s ease;
+      background: var(--text);
+    }
+
+    .checks-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.75rem;
+    }
+
+    .checks-grid { display: flex; flex-direction: column; gap: 10px; }
+
+    .check-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.25rem;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: start;
+      gap: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .check-card:hover { border-color: rgba(0,0,0,0.25); }
+
+    .check-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .icon-pass { background: var(--pass-bg); }
+    .icon-warn { background: var(--warn-bg); }
+    .icon-fail { background: var(--fail-bg); }
+
+    .check-body h3 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .check-body .check-message { font-size: 13px; color: var(--muted); }
+    .check-body .check-value {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+      font-family: monospace;
+      word-break: break-all;
+    }
+
+    .check-fix {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: var(--bg);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      border-left: 3px solid var(--border);
+    }
+
+    .check-fix.show { display: block; }
+    .check-fix strong { color: var(--text); }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .badge-pass { background: var(--pass-bg); color: var(--pass); }
+    .badge-warning { background: var(--warn-bg); color: var(--warn); }
+    .badge-fail { background: var(--fail-bg); color: var(--fail); }
+
+    .rescan-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+    }
+
+    .rescan-row a {
+      font-size: 13px;
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    .btn-sm {
+      font-size: 13px;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-sm:hover { background: var(--bg); }
+
+    #error-msg {
+      display: none;
+      background: var(--fail-bg);
+      color: var(--fail);
+      border: 1px solid rgba(163,45,45,0.2);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      font-size: 14px;
+      margin-bottom: 1rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 13px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: 3rem;
+    }
+
+    footer a { color: var(--blue); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="#" class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+    </div>
+    Email Health Scanner
+  </a>
+  <a href="https://mellifluous-raindrop-a19bff.netlify.app/" class="nav-link" target="_blank">
+    Email Verifier →
+  </a>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>Domain deliverability audit</h1>
+    <p>Paste any domain to instantly check SPF, DMARC, DKIM, MX records, and blacklist status.</p>
+  </div>
+
+  <div class="scan-box">
+    <input
+      type="text"
+      id="domain-input"
+      placeholder="yourdomain.com"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <button class="btn" id="scan-btn" onclick="startScan()">Scan domain</button>
+  </div>
+
+  <div class="examples">
+    <span style="font-size:12px;color:var(--muted);align-self:center;">Try:</span>
+    <button class="example-btn" onclick="tryExample('gmail.com')">gmail.com</button>
+    <button class="example-btn" onclick="tryExample('github.com')">github.com</button>
+    <button class="example-btn" onclick="tryExample('netflix.com')">netflix.com</button>
+    <button class="example-btn" onclick="tryExample('shopify.com')">shopify.com</button>
+  </div>
+
+  <div id="error-msg"></div>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    <p id="loading-text">Checking DNS records...</p>
+  </div>
+
+  <div id="results">
+    <div class="grade-card">
+      <div class="grade-circle" id="grade-circle">A</div>
+      <div class="grade-info">
+        <div class="domain-name" id="result-domain">domain.com</div>
+        <h2 id="grade-label">Excellent health</h2>
+        <p class="summary" id="result-summary"></p>
+        <div class="score-bar">
+          <div class="score-fill" id="score-fill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="checks-title">Check results</p>
+    <div class="checks-grid" id="checks-grid"></div>
+
+    <div class="rescan-row">
+      <a href="https://mellifluous-raindrop-a19bff.netlify.app/" target="_blank">
+        Also verify your email list →
+      </a>
+      <button class="btn-sm" onclick="resetForm()">Scan another domain</button>
+    </div>
+  </div>
+</main>
+
+<footer>
+  Built with Rust + Axum &nbsp;·&nbsp;
+  <a href="https://mellifluous-raindrop-a19bff.netlify.app/">Email Verifier</a>
+  &nbsp;·&nbsp; Email Health Scanner
+</footer>
+
+<script>
+  const API_URL = 'http://localhost:3001/api/scan';
+
+  const gradeLabels = {
+    A: 'Excellent health',
+    B: 'Good health',
+    C: 'Needs attention',
+    D: 'Poor health',
+    F: 'Critical issues',
+  };
+
+  const icons = {
+    pass: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--pass') || '#0f6e56'}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+    warning: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#854f0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
+    fail: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a32d2d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`,
+  };
+
+  function tryExample(domain) {
+    document.getElementById('domain-input').value = domain;
+    startScan();
+  }
+
+  function resetForm() {
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('error-msg').style.display = 'none';
+    document.getElementById('domain-input').value = '';
+    document.getElementById('domain-input').focus();
+  }
+
+  document.getElementById('domain-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') startScan();
+  });
+
+  const loadingMessages = [
+    'Checking DNS records...',
+    'Looking up SPF and DMARC...',
+    'Checking DKIM selectors...',
+    'Querying blacklists...',
+    'Calculating deliverability score...',
+  ];
+
+  let loadingInterval;
+
+  async function startScan() {
+    const input = document.getElementById('domain-input').value.trim();
+    if (!input) return;
+
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('error-msg').style.display = 'none';
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('scan-btn').disabled = true;
+
+    let msgIdx = 0;
+    loadingInterval = setInterval(() => {
+      document.getElementById('loading-text').textContent = loadingMessages[msgIdx % loadingMessages.length];
+      msgIdx++;
+    }, 1400);
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain: input }),
+      });
+
+      if (!res.ok) throw new Error('API error: ' + res.status);
+      const data = await res.json();
+      renderResults(data);
+    } catch (err) {
+      showError('Could not reach the scanner API. Make sure the backend is running. Error: ' + err.message);
+    } finally {
+      clearInterval(loadingInterval);
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('scan-btn').disabled = false;
+    }
+  }
+
+  function renderResults(data) {
+    const grade = data.grade;
+    const circle = document.getElementById('grade-circle');
+    circle.textContent = grade;
+    circle.className = 'grade-circle grade-' + grade;
+
+    document.getElementById('grade-label').textContent = gradeLabels[grade] || 'Unknown';
+    document.getElementById('result-domain').textContent = data.domain;
+    document.getElementById('result-summary').textContent = data.summary;
+
+    setTimeout(() => {
+      document.getElementById('score-fill').style.width = data.score + '%';
+    }, 100);
+
+    const grid = document.getElementById('checks-grid');
+    grid.innerHTML = '';
+
+    data.checks.forEach((check, i) => {
+      const statusClass = check.status === 'pass' ? 'pass' : check.status === 'warning' ? 'warn' : 'fail';
+      const badgeClass = check.status === 'pass' ? 'badge-pass' : check.status === 'warning' ? 'badge-warning' : 'badge-fail';
+
+      const card = document.createElement('div');
+      card.className = 'check-card';
+      card.onclick = () => {
+        const fix = card.querySelector('.check-fix');
+        if (fix) fix.classList.toggle('show');
+      };
+
+      card.innerHTML = `
+        <div class="check-icon icon-${statusClass}">${icons[check.status] || icons.fail}</div>
+        <div class="check-body">
+          <h3>${check.name}</h3>
+          <p class="check-message">${check.message}</p>
+          ${check.value && check.value !== 'Not found' ? `<p class="check-value">${check.value}</p>` : ''}
+          ${check.fix ? `<div class="check-fix"><strong>How to fix:</strong> ${check.fix}</div>` : ''}
+        </div>
+        <span class="status-badge ${badgeClass}">${check.status}</span>
+      `;
+
+      grid.appendChild(card);
+    });
+
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error-msg');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+</script>
+</body>
+</html>
