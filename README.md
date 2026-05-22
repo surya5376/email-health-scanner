@@ -54,7 +54,7 @@ fly launch --name email-health-scanner --region sin --dockerfile Dockerfile
 fly deploy
 ```
 
-Your API will be live at: https://email-health-scanner.fly.dev
+Your API will be live at: https://email-health-scanner.fly.dev .
 
 ## Step 4 — Deploy frontend to Netlify
 
