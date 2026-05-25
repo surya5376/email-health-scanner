@@ -6,415 +6,311 @@
   <title>Email Health Scanner — Domain Deliverability Audit</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #f8f7f4;
-      --surface: #ffffff;
-      --border: rgba(0,0,0,0.1);
-      --text: #1a1a18;
-      --muted: #6b6b66;
-      --pass: #0f6e56;
-      --pass-bg: #e1f5ee;
-      --warn: #854f0b;
-      --warn-bg: #faeeda;
-      --fail: #a32d2d;
-      --fail-bg: #fcebeb;
-      --blue: #185fa5;
-      --blue-bg: #e6f1fb;
-      --radius: 12px;
-      --radius-sm: 8px;
+      --bg: #f8f7f4; --surface: #ffffff; --border: rgba(0,0,0,0.1);
+      --text: #1a1a18; --muted: #6b6b66; --pass: #0f6e56; --pass-bg: #e1f5ee;
+      --warn: #854f0b; --warn-bg: #faeeda; --fail: #a32d2d; --fail-bg: #fcebeb;
+      --blue: #185fa5; --blue-bg: #e6f1fb; --radius: 12px; --radius-sm: 8px;
     }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      line-height: 1.6;
-    }
-
-    header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 0 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 60px;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 600;
-      font-size: 15px;
-      color: var(--text);
-      text-decoration: none;
-    }
-
-    .logo-icon {
-      width: 30px;
-      height: 30px;
-      background: var(--text);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; color: var(--text); text-decoration: none; }
+    .logo-icon { width: 30px; height: 30px; background: var(--text); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
     .logo-icon svg { width: 16px; height: 16px; fill: white; }
-
-    .nav-link {
-      font-size: 13px;
-      color: var(--muted);
-      text-decoration: none;
-      padding: 6px 14px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      transition: all 0.15s;
-    }
-
+    .nav-link { font-size: 13px; color: var(--muted); text-decoration: none; padding: 6px 14px; border: 1px solid var(--border); border-radius: 6px; transition: all 0.15s; }
     .nav-link:hover { background: var(--bg); color: var(--text); }
 
-    main { max-width: 760px; margin: 0 auto; padding: 3rem 1.5rem; }
+    /* TABS */
+    .tabs { display: flex; gap: 4px; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; }
+    .tab { padding: 14px 20px; font-size: 14px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+    .tab.active { color: var(--text); font-weight: 500; border-bottom-color: var(--text); }
+    .tab:hover:not(.active) { color: var(--text); }
 
-    .hero { text-align: center; margin-bottom: 2.5rem; }
+    main { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+
+    /* SINGLE SCAN */
+    .hero { text-align: center; margin-bottom: 2rem; }
     .hero h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 0.5rem; }
     .hero p { font-size: 15px; color: var(--muted); }
-
-    .scan-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      display: flex;
-      gap: 10px;
-      margin-bottom: 2rem;
-    }
-
-    .scan-box input {
-      flex: 1;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 0.65rem 1rem;
-      font-size: 15px;
-      outline: none;
-      background: var(--bg);
-      color: var(--text);
-      transition: border-color 0.15s;
-    }
-
+    .scan-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; display: flex; gap: 10px; margin-bottom: 1.5rem; }
+    .scan-box input { flex: 1; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.65rem 1rem; font-size: 15px; outline: none; background: var(--bg); color: var(--text); transition: border-color 0.15s; }
     .scan-box input:focus { border-color: var(--text); }
-
     .scan-box input::placeholder { color: var(--muted); }
-
-    .btn {
-      background: var(--text);
-      color: white;
-      border: none;
-      border-radius: var(--radius-sm);
-      padding: 0.65rem 1.4rem;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: opacity 0.15s;
-    }
-
+    .btn { background: var(--text); color: white; border: none; border-radius: var(--radius-sm); padding: 0.65rem 1.4rem; font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: opacity 0.15s; }
     .btn:hover { opacity: 0.85; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .examples {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 2rem;
-    }
-
-    .example-btn {
-      font-size: 12px;
-      color: var(--muted);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 4px 12px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
+    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.6rem 1.2rem; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+    .btn-outline:hover { background: var(--bg); }
+    .examples { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 2rem; }
+    .example-btn { font-size: 12px; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; cursor: pointer; transition: all 0.15s; }
     .example-btn:hover { color: var(--text); border-color: var(--text); }
-
-    #loading {
-      display: none;
-      text-align: center;
-      padding: 3rem 0;
-    }
-
-    .spinner {
-      width: 36px;
-      height: 36px;
-      border: 3px solid var(--border);
-      border-top-color: var(--text);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 1rem;
-    }
-
+    #loading { display: none; text-align: center; padding: 3rem 0; }
+    .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--text); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
     #loading p { color: var(--muted); font-size: 14px; }
-
     #results { display: none; }
-
-    .grade-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 2rem;
-      display: flex;
-      align-items: center;
-      gap: 2rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .grade-circle {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.5rem;
-      font-weight: 800;
-      flex-shrink: 0;
-      border: 4px solid;
-    }
-
+    .grade-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; display: flex; align-items: center; gap: 2rem; margin-bottom: 1.5rem; }
+    .grade-circle { width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 800; flex-shrink: 0; border: 4px solid; }
     .grade-A { color: var(--pass); border-color: var(--pass); background: var(--pass-bg); }
     .grade-B { color: #185fa5; border-color: #185fa5; background: var(--blue-bg); }
     .grade-C { color: #854f0b; border-color: #854f0b; background: var(--warn-bg); }
     .grade-D { color: #993c1d; border-color: #993c1d; background: #faece7; }
     .grade-F { color: var(--fail); border-color: var(--fail); background: var(--fail-bg); }
-
     .grade-info h2 { font-size: 1.2rem; font-weight: 600; margin-bottom: 4px; }
     .grade-info .domain-name { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
     .grade-info .summary { font-size: 14px; color: var(--muted); line-height: 1.5; }
-
-    .score-bar {
-      height: 6px;
-      background: var(--border);
-      border-radius: 3px;
-      margin-top: 10px;
-      overflow: hidden;
-    }
-
-    .score-fill {
-      height: 100%;
-      border-radius: 3px;
-      transition: width 0.8s ease;
-      background: var(--text);
-    }
-
-    .checks-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 0.75rem;
-    }
-
+    .score-bar { height: 6px; background: var(--border); border-radius: 3px; margin-top: 10px; overflow: hidden; }
+    .score-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; background: var(--text); }
+    .checks-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; }
     .checks-grid { display: flex; flex-direction: column; gap: 10px; }
-
-    .check-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 1rem 1.25rem;
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      align-items: start;
-      gap: 12px;
-      cursor: pointer;
-      transition: border-color 0.15s;
-    }
-
+    .check-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem 1.25rem; display: grid; grid-template-columns: auto 1fr auto; align-items: start; gap: 12px; cursor: pointer; transition: border-color 0.15s; }
     .check-card:hover { border-color: rgba(0,0,0,0.25); }
-
-    .check-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
+    .check-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; margin-top: 2px; }
     .icon-pass { background: var(--pass-bg); }
     .icon-warn { background: var(--warn-bg); }
     .icon-fail { background: var(--fail-bg); }
-
     .check-body h3 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
     .check-body .check-message { font-size: 13px; color: var(--muted); }
-    .check-body .check-value {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 4px;
-      font-family: monospace;
-      word-break: break-all;
-    }
-
-    .check-fix {
-      display: none;
-      margin-top: 10px;
-      padding: 10px 12px;
-      background: var(--bg);
-      border-radius: 6px;
-      font-size: 13px;
-      color: var(--muted);
-      border-left: 3px solid var(--border);
-    }
-
+    .check-body .check-value { font-size: 11px; color: var(--muted); margin-top: 4px; font-family: monospace; word-break: break-all; }
+    .check-fix { display: none; margin-top: 10px; padding: 10px 12px; background: var(--bg); border-radius: 6px; font-size: 13px; color: var(--muted); border-left: 3px solid var(--border); }
     .check-fix.show { display: block; }
     .check-fix strong { color: var(--text); }
-
-    .status-badge {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 3px 9px;
-      border-radius: 20px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      white-space: nowrap;
-    }
-
+    .status-badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
     .badge-pass { background: var(--pass-bg); color: var(--pass); }
     .badge-warning { background: var(--warn-bg); color: var(--warn); }
     .badge-fail { background: var(--fail-bg); color: var(--fail); }
+    .rescan-row { display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem; }
+    .rescan-row a { font-size: 13px; color: var(--blue); text-decoration: none; }
+    #error-msg { display: none; background: var(--fail-bg); color: var(--fail); border: 1px solid rgba(163,45,45,0.2); border-radius: var(--radius-sm); padding: 1rem; font-size: 14px; margin-bottom: 1rem; }
 
-    .rescan-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 1.5rem;
-    }
+    /* BULK SCAN */
+    #bulk-view { display: none; }
+    .upload-area { border: 2px dashed var(--border); border-radius: var(--radius); padding: 2.5rem; text-align: center; background: var(--surface); margin-bottom: 1.5rem; transition: border-color 0.2s; cursor: pointer; }
+    .upload-area.dragover { border-color: var(--text); background: var(--bg); }
+    .upload-area h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .upload-area p { font-size: 13px; color: var(--muted); margin-bottom: 1rem; }
+    .upload-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    #file-input { display: none; }
+    .or-divider { text-align: center; color: var(--muted); font-size: 13px; margin: 1rem 0; position: relative; }
+    .or-divider::before, .or-divider::after { content: ''; position: absolute; top: 50%; width: 45%; height: 1px; background: var(--border); }
+    .or-divider::before { left: 0; }
+    .or-divider::after { right: 0; }
+    .paste-area { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.75rem 1rem; font-size: 13px; font-family: monospace; resize: vertical; min-height: 120px; background: var(--surface); color: var(--text); outline: none; }
+    .paste-area:focus { border-color: var(--text); }
 
-    .rescan-row a {
-      font-size: 13px;
-      color: var(--blue);
-      text-decoration: none;
-    }
+    /* BULK STATS */
+    .bulk-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+    .bulk-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.85rem 1rem; text-align: center; }
+    .bulk-stat-val { font-size: 22px; font-weight: 700; }
+    .bulk-stat-lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
-    .btn-sm {
-      font-size: 13px;
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 6px 14px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
+    /* PROGRESS */
+    .bulk-progress-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
+    .bulk-progress-bar { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; margin: 8px 0; }
+    .bulk-progress-fill { height: 100%; border-radius: 4px; background: var(--text); transition: width 0.3s; }
+    .bulk-progress-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
 
-    .btn-sm:hover { background: var(--bg); }
+    /* FILTERS */
+    .filter-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
+    .filter-btn { font-size: 12px; padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; transition: all 0.15s; }
+    .filter-btn.active { background: var(--text); color: white; border-color: var(--text); }
+    .filter-btn:hover:not(.active) { color: var(--text); }
 
-    #error-msg {
-      display: none;
-      background: var(--fail-bg);
-      color: var(--fail);
-      border: 1px solid rgba(163,45,45,0.2);
-      border-radius: var(--radius-sm);
-      padding: 1rem;
-      font-size: 14px;
-      margin-bottom: 1rem;
-    }
+    /* BULK TABLE */
+    .bulk-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1.5rem; }
+    .bulk-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .bulk-table th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.05em; background: var(--bg); }
+    .bulk-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .bulk-table tr:last-child td { border-bottom: none; }
+    .bulk-table tr.expandable { cursor: pointer; transition: background 0.1s; }
+    .bulk-table tr.expandable:hover { background: var(--bg); }
+    .bulk-table tr.detail-row td { padding: 0; background: var(--bg); }
+    .detail-inner { padding: 1rem 1.25rem; display: none; }
+    .detail-inner.show { display: block; }
+    .detail-checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+    .detail-check { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.75rem 1rem; font-size: 12px; }
+    .detail-check-name { font-weight: 600; margin-bottom: 3px; }
+    .detail-check-msg { color: var(--muted); font-size: 11px; }
+    .detail-fix { margin-top: 6px; padding: 6px 8px; background: var(--bg); border-radius: 4px; font-size: 11px; color: var(--muted); border-left: 2px solid var(--border); }
 
-    footer {
-      text-align: center;
-      padding: 2rem;
-      font-size: 13px;
-      color: var(--muted);
-      border-top: 1px solid var(--border);
-      margin-top: 3rem;
-    }
+    .grade-pill { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; border: 2px solid; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+    .dot-pass { background: var(--pass); }
+    .dot-warn { background: #ef9f27; }
+    .dot-fail { background: var(--fail); }
+    .dot-wait { background: #ccc; }
 
+    /* PAGINATION */
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 1rem; }
+    .page-btn { width: 34px; height: 34px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .page-btn:hover:not(:disabled) { background: var(--bg); }
+    .page-btn.active { background: var(--text); color: white; border-color: var(--text); }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .page-info { font-size: 13px; color: var(--muted); }
+
+    /* DUPLICATES SECTION */
+    .dup-section { background: var(--warn-bg); border: 1px solid rgba(133,79,11,0.2); border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin-top: 1.5rem; }
+    .dup-section h3 { font-size: 14px; font-weight: 600; color: var(--warn); margin-bottom: 8px; }
+    .dup-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .dup-tag { font-size: 12px; background: white; border: 1px solid rgba(133,79,11,0.2); border-radius: 20px; padding: 3px 10px; color: var(--warn); }
+
+    /* TOOLBAR */
+    .bulk-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .search-input { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.5rem 0.85rem; font-size: 13px; outline: none; background: var(--surface); color: var(--text); width: 200px; }
+    .search-input:focus { border-color: var(--text); }
+
+    footer { text-align: center; padding: 2rem; font-size: 13px; color: var(--muted); border-top: 1px solid var(--border); margin-top: 3rem; }
     footer a { color: var(--blue); text-decoration: none; }
   </style>
 </head>
 <body>
 
 <header>
-  <a href="#" class="logo">
+  <a href="#" class="logo" onclick="switchTab('single')">
     <div class="logo-icon">
       <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
     </div>
     Email Health Scanner
   </a>
-  <a href="https://mellifluous-raindrop-a19bff.netlify.app/" class="nav-link" target="_blank">
-    Email Verifier →
-  </a>
+  <a href="https://mellifluous-raindrop-a19bff.netlify.app/" class="nav-link" target="_blank">Email Verifier →</a>
 </header>
 
+<div class="tabs">
+  <div class="tab active" id="tab-single" onclick="switchTab('single')">Single domain</div>
+  <div class="tab" id="tab-bulk" onclick="switchTab('bulk')">Bulk scan (CSV)</div>
+</div>
+
 <main>
-  <div class="hero">
-    <h1>Domain deliverability audit</h1>
-    <p>Paste any domain to instantly check SPF, DMARC, DKIM, MX records, and blacklist status.</p>
-  </div>
 
-  <div class="scan-box">
-    <input
-      type="text"
-      id="domain-input"
-      placeholder="yourdomain.com"
-      autocomplete="off"
-      spellcheck="false"
-    />
-    <button class="btn" id="scan-btn" onclick="startScan()">Scan domain</button>
-  </div>
-
-  <div class="examples">
-    <span style="font-size:12px;color:var(--muted);align-self:center;">Try:</span>
-    <button class="example-btn" onclick="tryExample('gmail.com')">gmail.com</button>
-    <button class="example-btn" onclick="tryExample('github.com')">github.com</button>
-    <button class="example-btn" onclick="tryExample('netflix.com')">netflix.com</button>
-    <button class="example-btn" onclick="tryExample('shopify.com')">shopify.com</button>
-  </div>
-
-  <div id="error-msg"></div>
-
-  <div id="loading">
-    <div class="spinner"></div>
-    <p id="loading-text">Checking DNS records...</p>
-  </div>
-
-  <div id="results">
-    <div class="grade-card">
-      <div class="grade-circle" id="grade-circle">A</div>
-      <div class="grade-info">
-        <div class="domain-name" id="result-domain">domain.com</div>
-        <h2 id="grade-label">Excellent health</h2>
-        <p class="summary" id="result-summary"></p>
-        <div class="score-bar">
-          <div class="score-fill" id="score-fill" style="width:0%"></div>
+  <!-- SINGLE SCAN VIEW -->
+  <div id="single-view">
+    <div class="hero">
+      <h1>Domain deliverability audit</h1>
+      <p>Paste any domain to instantly check SPF, DMARC, DKIM, MX records, and blacklist status.</p>
+    </div>
+    <div class="scan-box">
+      <input type="text" id="domain-input" placeholder="yourdomain.com" autocomplete="off" spellcheck="false" />
+      <button class="btn" id="scan-btn" onclick="startScan()">Scan domain</button>
+    </div>
+    <div class="examples">
+      <span style="font-size:12px;color:var(--muted);align-self:center;">Try:</span>
+      <button class="example-btn" onclick="tryExample('gmail.com')">gmail.com</button>
+      <button class="example-btn" onclick="tryExample('github.com')">github.com</button>
+      <button class="example-btn" onclick="tryExample('netflix.com')">netflix.com</button>
+      <button class="example-btn" onclick="tryExample('shopify.com')">shopify.com</button>
+    </div>
+    <div id="error-msg"></div>
+    <div id="loading">
+      <div class="spinner"></div>
+      <p id="loading-text">Checking DNS records...</p>
+    </div>
+    <div id="results">
+      <div class="grade-card">
+        <div class="grade-circle" id="grade-circle">A</div>
+        <div class="grade-info">
+          <div class="domain-name" id="result-domain">domain.com</div>
+          <h2 id="grade-label">Excellent health</h2>
+          <p class="summary" id="result-summary"></p>
+          <div class="score-bar"><div class="score-fill" id="score-fill" style="width:0%"></div></div>
         </div>
+      </div>
+      <p class="checks-title">Check results</p>
+      <div class="checks-grid" id="checks-grid"></div>
+      <div class="rescan-row">
+        <a href="https://mellifluous-raindrop-a19bff.netlify.app/" target="_blank">Also verify your email list →</a>
+        <button class="btn-outline" onclick="resetSingle()">Scan another domain</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BULK SCAN VIEW -->
+  <div id="bulk-view">
+    <div id="bulk-upload-section">
+      <div class="hero">
+        <h1>Bulk domain scanner</h1>
+        <p>Upload a CSV or paste up to 1000 domains. Duplicates are filtered automatically.</p>
+      </div>
+
+      <div class="upload-area" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <div class="upload-icon">📂</div>
+        <h3>Drop your CSV file here</h3>
+        <p>One domain per row — supports up to 1000 domains</p>
+        <button class="btn" onclick="event.stopPropagation(); document.getElementById('file-input').click()">Browse file</button>
+        <input type="file" id="file-input" accept=".csv,.txt" onchange="handleFileSelect(event)" />
+      </div>
+
+      <div class="or-divider">or paste domains manually</div>
+
+      <textarea class="paste-area" id="paste-input" placeholder="gmail.com&#10;github.com&#10;netflix.com&#10;shopify.com&#10;...one domain per line"></textarea>
+
+      <div style="display:flex;gap:10px;margin-top:1rem;justify-content:flex-end">
+        <button class="btn-outline" onclick="clearBulk()">Clear</button>
+        <button class="btn" onclick="startBulkScan()">Start bulk scan</button>
       </div>
     </div>
 
-    <p class="checks-title">Check results</p>
-    <div class="checks-grid" id="checks-grid"></div>
+    <!-- BULK RESULTS -->
+    <div id="bulk-results-section" style="display:none">
 
-    <div class="rescan-row">
-      <a href="https://mellifluous-raindrop-a19bff.netlify.app/" target="_blank">
-        Also verify your email list →
-      </a>
-      <button class="btn-sm" onclick="resetForm()">Scan another domain</button>
+      <div class="bulk-stats" id="bulk-stats"></div>
+
+      <div class="bulk-progress-wrap" id="bulk-progress-wrap">
+        <div class="bulk-progress-row">
+          <span id="progress-label">Scanning domains...</span>
+          <span id="progress-count">0 / 0</span>
+        </div>
+        <div class="bulk-progress-bar"><div class="bulk-progress-fill" id="bulk-progress-fill" style="width:0%"></div></div>
+        <div class="bulk-progress-row" style="margin-top:4px">
+          <span id="progress-eta" style="font-size:12px"></span>
+          <span id="progress-speed" style="font-size:12px"></span>
+        </div>
+      </div>
+
+      <div class="bulk-toolbar">
+        <input type="text" class="search-input" id="bulk-search" placeholder="Search domains..." oninput="renderTable()" />
+        <div class="filter-bar" style="margin:0">
+          <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+          <button class="filter-btn" onclick="setFilter('pass', this)">Pass (A/B)</button>
+          <button class="filter-btn" onclick="setFilter('warning', this)">Warning (C/D)</button>
+          <button class="filter-btn" onclick="setFilter('fail', this)">Fail (F)</button>
+          <button class="filter-btn" onclick="setFilter('pending', this)">Pending</button>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button class="btn-outline" onclick="downloadCSV()" id="download-btn" disabled>⬇ Download CSV</button>
+          <button class="btn-outline" onclick="resetBulk()">New scan</button>
+        </div>
+      </div>
+
+      <div class="bulk-table-wrap">
+        <table class="bulk-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Domain</th>
+              <th>Grade</th>
+              <th>Score</th>
+              <th>SPF</th>
+              <th>DMARC</th>
+              <th>DKIM</th>
+              <th>MX</th>
+              <th>Blacklist</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="bulk-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="pagination" id="pagination"></div>
+
+      <div class="dup-section" id="dup-section" style="display:none">
+        <h3>⚠ Duplicate domains removed</h3>
+        <p style="font-size:13px;color:var(--warn);margin-bottom:8px">The following domains appeared more than once in your input. Each was scanned only once.</p>
+        <div class="dup-list" id="dup-list"></div>
+      </div>
     </div>
   </div>
+
 </main>
 
 <footer>
@@ -424,133 +320,422 @@
 </footer>
 
 <script>
-  const API_URL = 'https://email-health-scanner-api.onrender.com/api/scan';
+const API_URL = 'http://localhost:3001/api/scan';
+const DOMAINS_PER_PAGE = 50;
+const CONCURRENCY = 5;
 
-  const gradeLabels = {
-    A: 'Excellent health',
-    B: 'Good health',
-    C: 'Needs attention',
-    D: 'Poor health',
-    F: 'Critical issues',
-  };
+const gradeLabels = { A:'Excellent health', B:'Good health', C:'Needs attention', D:'Poor health', F:'Critical issues' };
+const icons = {
+  pass: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f6e56" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+  warning: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#854f0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
+  fail: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a32d2d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`,
+};
 
-  const icons = {
-    pass: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--pass') || '#0f6e56'}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
-    warning: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#854f0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
-    fail: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a32d2d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`,
-  };
+// ─── STATE ───────────────────────────────────────────────
+let bulkResults = [];
+let currentPage = 1;
+let currentFilter = 'all';
+let scanStartTime = null;
+let duplicates = [];
+let scanning = false;
 
-  function tryExample(domain) {
-    document.getElementById('domain-input').value = domain;
-    startScan();
+// ─── TAB SWITCHING ────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('single-view').style.display = tab === 'single' ? 'block' : 'none';
+  document.getElementById('bulk-view').style.display   = tab === 'bulk'   ? 'block' : 'none';
+  document.getElementById('tab-single').classList.toggle('active', tab === 'single');
+  document.getElementById('tab-bulk').classList.toggle('active', tab === 'bulk');
+}
+
+// ─── SINGLE SCAN ─────────────────────────────────────────
+function tryExample(d) { document.getElementById('domain-input').value = d; startScan(); }
+function resetSingle() {
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('error-msg').style.display = 'none';
+  document.getElementById('domain-input').value = '';
+  document.getElementById('domain-input').focus();
+}
+document.getElementById('domain-input').addEventListener('keydown', e => { if (e.key === 'Enter') startScan(); });
+
+const loadingMessages = ['Checking DNS records...','Looking up SPF and DMARC...','Checking DKIM selectors...','Querying blacklists...','Calculating deliverability score...'];
+let loadingInterval;
+
+async function startScan() {
+  const input = document.getElementById('domain-input').value.trim();
+  if (!input) return;
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('error-msg').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('scan-btn').disabled = true;
+  let idx = 0;
+  loadingInterval = setInterval(() => { document.getElementById('loading-text').textContent = loadingMessages[idx++ % loadingMessages.length]; }, 1400);
+  try {
+    const data = await scanDomain(input);
+    renderSingleResult(data);
+  } catch(e) {
+    const el = document.getElementById('error-msg');
+    el.textContent = 'Could not reach the scanner API. Error: ' + e.message;
+    el.style.display = 'block';
+  } finally {
+    clearInterval(loadingInterval);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('scan-btn').disabled = false;
   }
+}
 
-  function resetForm() {
-    document.getElementById('results').style.display = 'none';
-    document.getElementById('error-msg').style.display = 'none';
-    document.getElementById('domain-input').value = '';
-    document.getElementById('domain-input').focus();
-  }
+async function scanDomain(domain) {
+  const res = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({domain}) });
+  if (!res.ok) throw new Error('API error: ' + res.status);
+  return res.json();
+}
 
-  document.getElementById('domain-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') startScan();
+function renderSingleResult(data) {
+  const grade = data.grade;
+  const circle = document.getElementById('grade-circle');
+  circle.textContent = grade;
+  circle.className = 'grade-circle grade-' + grade;
+  document.getElementById('grade-label').textContent = gradeLabels[grade] || 'Unknown';
+  document.getElementById('result-domain').textContent = data.domain;
+  document.getElementById('result-summary').textContent = data.summary;
+  setTimeout(() => { document.getElementById('score-fill').style.width = data.score + '%'; }, 100);
+  const grid = document.getElementById('checks-grid');
+  grid.innerHTML = '';
+  data.checks.forEach(check => {
+    const sc = check.status === 'pass' ? 'pass' : check.status === 'warning' ? 'warn' : 'fail';
+    const card = document.createElement('div');
+    card.className = 'check-card';
+    card.onclick = () => card.querySelector('.check-fix')?.classList.toggle('show');
+    card.innerHTML = `
+      <div class="check-icon icon-${sc}">${icons[check.status] || icons.fail}</div>
+      <div class="check-body">
+        <h3>${check.name}</h3>
+        <p class="check-message">${check.message}</p>
+        ${check.value && check.value !== 'Not found' ? `<p class="check-value">${check.value}</p>` : ''}
+        ${check.fix ? `<div class="check-fix"><strong>How to fix:</strong> ${check.fix}</div>` : ''}
+      </div>
+      <span class="status-badge badge-${check.status === 'pass' ? 'pass' : check.status === 'warning' ? 'warning' : 'fail'}">${check.status}</span>`;
+    grid.appendChild(card);
+  });
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ─── BULK: FILE HANDLING ──────────────────────────────────
+function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('dragover'); }
+function handleDragLeave(e) { document.getElementById('drop-zone').classList.remove('dragover'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) readFile(file);
+}
+function handleFileSelect(e) { const file = e.target.files[0]; if (file) readFile(file); }
+function readFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => { document.getElementById('paste-input').value = e.target.result; };
+  reader.readAsText(file);
+}
+function clearBulk() { document.getElementById('paste-input').value = ''; document.getElementById('file-input').value = ''; }
+
+// ─── BULK: PARSE + DEDUPLICATE ────────────────────────────
+function parseDomains(raw) {
+  const lines = raw.split(/[\n,;]+/).map(l => l.trim().toLowerCase())
+    .map(l => l.replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0])
+    .filter(l => l.length > 0 && l.includes('.'));
+
+  const seen = new Set();
+  const dups = new Set();
+  const unique = [];
+
+  lines.forEach(d => {
+    if (seen.has(d)) { dups.add(d); }
+    else { seen.add(d); unique.push(d); }
   });
 
-  const loadingMessages = [
-    'Checking DNS records...',
-    'Looking up SPF and DMARC...',
-    'Checking DKIM selectors...',
-    'Querying blacklists...',
-    'Calculating deliverability score...',
-  ];
+  return { unique: unique.slice(0, 1000), duplicates: [...dups] };
+}
 
-  let loadingInterval;
+// ─── BULK: START SCAN ─────────────────────────────────────
+async function startBulkScan() {
+  const raw = document.getElementById('paste-input').value.trim();
+  if (!raw) { alert('Please paste domains or upload a CSV file first.'); return; }
 
-  async function startScan() {
-    const input = document.getElementById('domain-input').value.trim();
-    if (!input) return;
+  const { unique, duplicates: dups } = parseDomains(raw);
+  if (unique.length === 0) { alert('No valid domains found. Make sure each line has a domain like example.com'); return; }
 
-    document.getElementById('results').style.display = 'none';
-    document.getElementById('error-msg').style.display = 'none';
-    document.getElementById('loading').style.display = 'block';
-    document.getElementById('scan-btn').disabled = true;
+  duplicates = dups;
+  bulkResults = unique.map((domain, i) => ({ index: i + 1, domain, status: 'pending', data: null }));
+  currentPage = 1;
+  currentFilter = 'all';
+  scanStartTime = Date.now();
 
-    let msgIdx = 0;
-    loadingInterval = setInterval(() => {
-      document.getElementById('loading-text').textContent = loadingMessages[msgIdx % loadingMessages.length];
-      msgIdx++;
-    }, 1400);
+  document.getElementById('bulk-upload-section').style.display = 'none';
+  document.getElementById('bulk-results-section').style.display = 'block';
+  document.getElementById('download-btn').disabled = true;
 
-    try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain: input }),
-      });
+  updateBulkStats();
+  renderTable();
+  renderPagination();
+  showDuplicates();
 
-      if (!res.ok) throw new Error('API error: ' + res.status);
-      const data = await res.json();
-      renderResults(data);
-    } catch (err) {
-      showError('Could not reach the scanner API. Make sure the backend is running. Error: ' + err.message);
-    } finally {
-      clearInterval(loadingInterval);
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('scan-btn').disabled = false;
+  // scan with concurrency limit
+  const queue = [...unique];
+  let active = 0;
+  let completed = 0;
+
+  await new Promise(resolve => {
+    function next() {
+      while (active < CONCURRENCY && queue.length > 0) {
+        const domain = queue.shift();
+        active++;
+        scanDomain(domain).then(data => {
+          const entry = bulkResults.find(r => r.domain === domain);
+          if (entry) { entry.status = 'done'; entry.data = data; }
+        }).catch(() => {
+          const entry = bulkResults.find(r => r.domain === domain);
+          if (entry) { entry.status = 'error'; }
+        }).finally(() => {
+          active--;
+          completed++;
+          updateProgress(completed, unique.length);
+          updateBulkStats();
+          renderTable();
+          if (completed === unique.length) { resolve(); }
+          else { next(); }
+        });
+      }
+    }
+    next();
+  });
+
+  document.getElementById('progress-label').textContent = 'Scan complete!';
+  document.getElementById('download-btn').disabled = false;
+}
+
+// ─── BULK: PROGRESS ───────────────────────────────────────
+function updateProgress(done, total) {
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('bulk-progress-fill').style.width = pct + '%';
+  document.getElementById('progress-count').textContent = done + ' / ' + total;
+  if (done > 0 && done < total) {
+    const elapsed = (Date.now() - scanStartTime) / 1000;
+    const rate = done / elapsed;
+    const remaining = Math.ceil((total - done) / rate);
+    document.getElementById('progress-eta').textContent = `~${remaining}s remaining`;
+    document.getElementById('progress-speed').textContent = `${rate.toFixed(1)} domains/sec`;
+  }
+}
+
+// ─── BULK: STATS ──────────────────────────────────────────
+function updateBulkStats() {
+  const total = bulkResults.length;
+  const done = bulkResults.filter(r => r.status === 'done').length;
+  const pass = bulkResults.filter(r => r.data && ['A','B'].includes(r.data.grade)).length;
+  const warn = bulkResults.filter(r => r.data && ['C','D'].includes(r.data.grade)).length;
+  const fail = bulkResults.filter(r => r.data && r.data.grade === 'F').length;
+  const errors = bulkResults.filter(r => r.status === 'error').length;
+
+  document.getElementById('bulk-stats').innerHTML = `
+    <div class="bulk-stat"><div class="bulk-stat-val">${total}</div><div class="bulk-stat-lbl">Total domains</div></div>
+    <div class="bulk-stat"><div class="bulk-stat-val" style="color:var(--blue)">${done}</div><div class="bulk-stat-lbl">Scanned</div></div>
+    <div class="bulk-stat"><div class="bulk-stat-val" style="color:var(--pass)">${pass}</div><div class="bulk-stat-lbl">Pass (A/B)</div></div>
+    <div class="bulk-stat"><div class="bulk-stat-val" style="color:var(--warn)">${warn}</div><div class="bulk-stat-lbl">Warning (C/D)</div></div>
+    <div class="bulk-stat"><div class="bulk-stat-val" style="color:var(--fail)">${fail}</div><div class="bulk-stat-lbl">Fail (F)</div></div>
+    <div class="bulk-stat"><div class="bulk-stat-val" style="color:var(--muted)">${errors}</div><div class="bulk-stat-lbl">Errors</div></div>`;
+}
+
+// ─── BULK: FILTER + SEARCH ────────────────────────────────
+function setFilter(f, btn) {
+  currentFilter = f;
+  currentPage = 1;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+  renderPagination();
+}
+
+function getFilteredResults() {
+  const search = (document.getElementById('bulk-search')?.value || '').toLowerCase();
+  return bulkResults.filter(r => {
+    if (search && !r.domain.includes(search)) return false;
+    if (currentFilter === 'all') return true;
+    if (currentFilter === 'pass') return r.data && ['A','B'].includes(r.data.grade);
+    if (currentFilter === 'warning') return r.data && ['C','D'].includes(r.data.grade);
+    if (currentFilter === 'fail') return r.data && r.data.grade === 'F';
+    if (currentFilter === 'pending') return r.status === 'pending' || r.status === 'error';
+    return true;
+  });
+}
+
+// ─── BULK: RENDER TABLE ───────────────────────────────────
+function renderTable() {
+  const filtered = getFilteredResults();
+  const start = (currentPage - 1) * DOMAINS_PER_PAGE;
+  const page = filtered.slice(start, start + DOMAINS_PER_PAGE);
+  const tbody = document.getElementById('bulk-tbody');
+  tbody.innerHTML = '';
+
+  if (page.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--muted)">No domains match this filter.</td></tr>`;
+    return;
+  }
+
+  page.forEach((r, pageIdx) => {
+    const globalIdx = start + pageIdx;
+    const isPending = r.status === 'pending';
+    const isError = r.status === 'error';
+    const d = r.data;
+
+    const gradeHtml = d
+      ? `<div class="grade-pill grade-${d.grade}" style="border-color:currentColor">${d.grade}</div>`
+      : `<div class="grade-pill" style="color:var(--muted);border-color:var(--border)">—</div>`;
+
+    const dotFor = s => {
+      if (!d) return `<span class="dot dot-wait"></span>—`;
+      const check = d.checks.find(c => c.name.toLowerCase().includes(s));
+      if (!check) return `<span class="dot dot-wait"></span>—`;
+      const cls = check.status === 'pass' ? 'dot-pass' : check.status === 'warning' ? 'dot-warn' : 'dot-fail';
+      return `<span class="dot ${cls}"></span>${check.status}`;
+    };
+
+    let statusHtml;
+    if (isPending) statusHtml = `<span class="status-badge" style="background:#e6f1fb;color:#185fa5">Pending</span>`;
+    else if (isError) statusHtml = `<span class="status-badge badge-fail">Error</span>`;
+    else if (d) {
+      const bc = d.grade === 'A' || d.grade === 'B' ? 'badge-pass' : d.grade === 'C' || d.grade === 'D' ? 'badge-warning' : 'badge-fail';
+      statusHtml = `<span class="status-badge ${bc}">Done</span>`;
+    }
+
+    const tr = document.createElement('tr');
+    tr.className = d ? 'expandable' : '';
+    tr.innerHTML = `
+      <td style="color:var(--muted)">${r.index}</td>
+      <td style="font-weight:500">${r.domain}</td>
+      <td>${gradeHtml}</td>
+      <td>${d ? d.score : '—'}</td>
+      <td style="font-size:12px">${dotFor('spf')}</td>
+      <td style="font-size:12px">${dotFor('dmarc')}</td>
+      <td style="font-size:12px">${dotFor('dkim')}</td>
+      <td style="font-size:12px">${dotFor('mx')}</td>
+      <td style="font-size:12px">${dotFor('blacklist')}</td>
+      <td>${statusHtml}</td>`;
+
+    if (d) {
+      tr.onclick = () => {
+        const existing = document.getElementById('detail-' + globalIdx);
+        if (existing) { existing.remove(); return; }
+        const detailTr = document.createElement('tr');
+        detailTr.className = 'detail-row';
+        detailTr.id = 'detail-' + globalIdx;
+        detailTr.innerHTML = `<td colspan="10"><div class="detail-inner show">${buildDetailHTML(d)}</div></td>`;
+        tr.insertAdjacentElement('afterend', detailTr);
+      };
+    }
+
+    tbody.appendChild(tr);
+  });
+
+  renderPagination();
+}
+
+function buildDetailHTML(d) {
+  const checksHtml = d.checks.map(c => {
+    const sc = c.status === 'pass' ? 'var(--pass-bg)' : c.status === 'warning' ? 'var(--warn-bg)' : 'var(--fail-bg)';
+    const tc = c.status === 'pass' ? 'var(--pass)' : c.status === 'warning' ? 'var(--warn)' : 'var(--fail)';
+    return `<div class="detail-check">
+      <div class="detail-check-name" style="color:${tc}">${c.name} — <span style="background:${sc};padding:1px 7px;border-radius:10px;font-size:11px">${c.status}</span></div>
+      <div class="detail-check-msg">${c.message}</div>
+      ${c.value && c.value !== 'Not found' ? `<div class="detail-check-msg" style="font-family:monospace;font-size:10px;margin-top:3px">${c.value}</div>` : ''}
+      ${c.fix ? `<div class="detail-fix"><strong>Fix:</strong> ${c.fix}</div>` : ''}
+    </div>`;
+  }).join('');
+  return `<div style="margin-bottom:8px;font-size:13px;font-weight:500">${d.domain} — Score ${d.score}/100 · ${d.summary}</div><div class="detail-checks">${checksHtml}</div>`;
+}
+
+// ─── PAGINATION ───────────────────────────────────────────
+function renderPagination() {
+  const filtered = getFilteredResults();
+  const totalPages = Math.ceil(filtered.length / DOMAINS_PER_PAGE);
+  const pag = document.getElementById('pagination');
+  if (totalPages <= 1) { pag.innerHTML = ''; return; }
+
+  let html = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
+      html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+    } else if (Math.abs(i - currentPage) === 3) {
+      html += `<span class="page-info">…</span>`;
     }
   }
+  html += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`;
+  html += `<span class="page-info">${filtered.length} domains</span>`;
+  pag.innerHTML = html;
+}
 
-  function renderResults(data) {
-    const grade = data.grade;
-    const circle = document.getElementById('grade-circle');
-    circle.textContent = grade;
-    circle.className = 'grade-circle grade-' + grade;
+function goPage(p) {
+  const filtered = getFilteredResults();
+  const totalPages = Math.ceil(filtered.length / DOMAINS_PER_PAGE);
+  if (p < 1 || p > totalPages) return;
+  currentPage = p;
+  renderTable();
+  document.getElementById('bulk-results-section').scrollIntoView({ behavior:'smooth', block:'start' });
+}
 
-    document.getElementById('grade-label').textContent = gradeLabels[grade] || 'Unknown';
-    document.getElementById('result-domain').textContent = data.domain;
-    document.getElementById('result-summary').textContent = data.summary;
+// ─── DUPLICATES ───────────────────────────────────────────
+function showDuplicates() {
+  const sec = document.getElementById('dup-section');
+  if (duplicates.length === 0) { sec.style.display = 'none'; return; }
+  sec.style.display = 'block';
+  document.getElementById('dup-list').innerHTML = duplicates.map(d =>
+    `<span class="dup-tag">${d} <span style="opacity:.6">×${countOccurrences(d)}</span></span>`
+  ).join('');
+}
 
-    setTimeout(() => {
-      document.getElementById('score-fill').style.width = data.score + '%';
-    }, 100);
+function countOccurrences(domain) {
+  const raw = document.getElementById('paste-input').value;
+  const all = raw.split(/[\n,;]+/).map(l => l.trim().toLowerCase()
+    .replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0]);
+  return all.filter(d => d === domain).length;
+}
 
-    const grid = document.getElementById('checks-grid');
-    grid.innerHTML = '';
+// ─── DOWNLOAD CSV ─────────────────────────────────────────
+function downloadCSV() {
+  const headers = ['#','Domain','Grade','Score','SPF','DMARC','DKIM','MX','Blacklist','Summary'];
+  const rows = bulkResults.filter(r => r.data).map(r => {
+    const d = r.data;
+    const getCheck = name => {
+      const c = d.checks.find(c => c.name.toLowerCase().includes(name));
+      return c ? c.status : 'unknown';
+    };
+    return [r.index, d.domain, d.grade, d.score,
+      getCheck('spf'), getCheck('dmarc'), getCheck('dkim'), getCheck('mx'), getCheck('blacklist'),
+      '"' + d.summary.replace(/"/g,'""') + '"'];
+  });
 
-    data.checks.forEach((check, i) => {
-      const statusClass = check.status === 'pass' ? 'pass' : check.status === 'warning' ? 'warn' : 'fail';
-      const badgeClass = check.status === 'pass' ? 'badge-pass' : check.status === 'warning' ? 'badge-warning' : 'badge-fail';
-
-      const card = document.createElement('div');
-      card.className = 'check-card';
-      card.onclick = () => {
-        const fix = card.querySelector('.check-fix');
-        if (fix) fix.classList.toggle('show');
-      };
-
-      card.innerHTML = `
-        <div class="check-icon icon-${statusClass}">${icons[check.status] || icons.fail}</div>
-        <div class="check-body">
-          <h3>${check.name}</h3>
-          <p class="check-message">${check.message}</p>
-          ${check.value && check.value !== 'Not found' ? `<p class="check-value">${check.value}</p>` : ''}
-          ${check.fix ? `<div class="check-fix"><strong>How to fix:</strong> ${check.fix}</div>` : ''}
-        </div>
-        <span class="status-badge ${badgeClass}">${check.status}</span>
-      `;
-
-      grid.appendChild(card);
-    });
-
-    document.getElementById('results').style.display = 'block';
-    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (duplicates.length > 0) {
+    rows.push([]);
+    rows.push(['DUPLICATES REMOVED (scanned once each):']);
+    duplicates.forEach(d => rows.push(['', d, 'duplicate', '', '', '', '', '', '', '']));
   }
 
-  function showError(msg) {
-    const el = document.getElementById('error-msg');
-    el.textContent = msg;
-    el.style.display = 'block';
-  }
+  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type:'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `email-health-scan-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── RESET ────────────────────────────────────────────────
+function resetBulk() {
+  bulkResults = []; duplicates = [];
+  document.getElementById('bulk-upload-section').style.display = 'block';
+  document.getElementById('bulk-results-section').style.display = 'none';
+  document.getElementById('paste-input').value = '';
+  document.getElementById('file-input').value = '';
+}
 </script>
 </body>
 </html>
