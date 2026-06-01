@@ -28,6 +28,14 @@ struct CheckResult {
     fix: String,
 }
 
+#[derive(Serialize, Clone)]
+struct EmailProvider {
+    name: String,
+    icon: String,
+    color: String,
+    mx_hint: String,
+}
+
 #[derive(Serialize)]
 struct ScanResponse {
     domain: String,
@@ -35,6 +43,7 @@ struct ScanResponse {
     score: u32,
     checks: Vec<CheckResult>,
     summary: String,
+    email_provider: EmailProvider,
 }
 
 async fn build_resolver() -> TokioAsyncResolver {
@@ -340,6 +349,40 @@ fn build_summary(grade: &str, score: u32, checks: &[CheckResult]) -> String {
     }
 }
 
+
+fn detect_email_provider(mx_records: &str) -> EmailProvider {
+    let mx = mx_records.to_lowercase();
+    if mx.contains("google") || mx.contains("googlemail") || mx.contains("aspmx") {
+        EmailProvider { name: "Google Workspace".to_string(), icon: "G".to_string(), color: "#4285F4".to_string(), mx_hint: mx_records.to_string() }
+    } else if mx.contains("outlook") || mx.contains("microsoft") || mx.contains("hotmail") || mx.contains("office365") {
+        EmailProvider { name: "Microsoft 365".to_string(), icon: "M".to_string(), color: "#0078D4".to_string(), mx_hint: mx_records.to_string() }
+    } else if mx.contains("zoho") {
+        EmailProvider { name: "Zoho Mail".to_string(), icon: "Z".to_string(), color: "#E50000".to_string(), mx_hint: mx_records.to_string() }
+    } else if mx.contains("mimecast") {
+        EmailProvider { name: "Mimecast".to_string(), icon: "MC".to_string(), color: "#FF6600".to_string(), mx_hint: mx_records.to_string() }
+    } else if mx.contains("proofpoint") || mx.contains("pphosted") {
+        EmailProvider { name: "Proofpoint".to_string(), icon: "PP".to_string(), color: "#0046AD".to_string(), mx_hint: mx_records.to_string() }
+    } else if mx.contains("amazonses") || mx.contains("amazonaws") {
+        EmailProvider { name: "Amazon SES".to_string(), icon: "AWS".to_string(), color: "#FF9900".to_string(), mx_hint: mx_records.to_string() }
+    } else if mx.contains("sendgrid") {
+        EmailProvider { name: "SendGrid".to_string(), icon: "SG".to_string(), color: "#1A82E2".to_string(), mx_hint: mx_records.to_string() }
+    } else if mx.contains("mailgun") {
+        EmailProvider { name: "Mailgun".to_string(), icon: "MG".to_string(), color: "#F06B66".to_string(), mx_hint: mx_records.to_string() }
+    } else if mx.contains("fastmail") {
+        EmailProvider { name: "Fastmail".to_string(), icon: "FM".to_string(), color: "#1A4A8A".to_string(), mx_hint: mx_records.to_string() }
+    } else if mx.contains("yahoo") || mx.contains("yahoodns") {
+        EmailProvider { name: "Yahoo Mail".to_string(), icon: "Y".to_string(), color: "#6001D2".to_string(), mx_hint: mx_records.to_string() }
+    } else if mx.contains("icloud") || mx.contains("apple") {
+        EmailProvider { name: "Apple iCloud".to_string(), icon: "A".to_string(), color: "#555555".to_string(), mx_hint: mx_records.to_string() }
+    } else if mx.contains("mailchimp") || mx.contains("mandrill") {
+        EmailProvider { name: "Mailchimp".to_string(), icon: "MC".to_string(), color: "#FFE01B".to_string(), mx_hint: mx_records.to_string() }
+    } else if mx.is_empty() || mx == "no mx ip found" || mx == "dns error" {
+        EmailProvider { name: "Unknown".to_string(), icon: "?".to_string(), color: "#999999".to_string(), mx_hint: "No MX records found".to_string() }
+    } else {
+        EmailProvider { name: "Custom / Self-hosted".to_string(), icon: "✉".to_string(), color: "#555555".to_string(), mx_hint: mx_records.to_string() }
+    }
+}
+
 async fn scan_domain(Json(payload): Json<ScanRequest>) -> ResponseJson<ScanResponse> {
     let domain = payload.domain.trim().to_lowercase();
     let domain = domain.trim_start_matches("http://").trim_start_matches("https://").trim_start_matches("www.");
@@ -357,9 +400,11 @@ async fn scan_domain(Json(payload): Json<ScanRequest>) -> ResponseJson<ScanRespo
         check_blacklist(&resolver, &domain),
     );
 
+    let mx_value = mx.value.clone();
     let checks = vec![spf, dmarc, dkim, mx, blacklist];
     let (grade, score) = calculate_grade(&checks);
     let summary = build_summary(&grade, score, &checks);
+    let email_provider = detect_email_provider(&mx_value);
 
     ResponseJson(ScanResponse {
         domain,
@@ -367,6 +412,7 @@ async fn scan_domain(Json(payload): Json<ScanRequest>) -> ResponseJson<ScanRespo
         score,
         checks,
         summary,
+        email_provider,
     })
 }
 

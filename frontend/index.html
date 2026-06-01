@@ -59,6 +59,13 @@
     .grade-info h2 { font-size: 1.2rem; font-weight: 600; margin-bottom: 4px; }
     .grade-info .domain-name { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
     .grade-info .summary { font-size: 14px; color: var(--muted); line-height: 1.5; }
+
+    /* EMAIL PROVIDER BADGE */
+    .provider-badge { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; padding: 6px 14px 6px 8px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); }
+    .provider-icon { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; }
+    .provider-label { font-size: 11px; color: var(--muted); }
+    .provider-name { font-size: 13px; font-weight: 500; color: var(--text); }
+    .provider-mx { font-size: 11px; color: var(--muted); font-family: monospace; margin-top: 2px; }
     .score-bar { height: 6px; background: var(--border); border-radius: 3px; margin-top: 10px; overflow: hidden; }
     .score-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; background: var(--text); }
     .checks-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; }
@@ -212,6 +219,14 @@
           <h2 id="grade-label">Excellent health</h2>
           <p class="summary" id="result-summary"></p>
           <div class="score-bar"><div class="score-fill" id="score-fill" style="width:0%"></div></div>
+          <div id="provider-badge" style="display:none" class="provider-badge">
+            <div class="provider-icon" id="provider-icon"></div>
+            <div>
+              <div class="provider-label">Email Provider</div>
+              <div class="provider-name" id="provider-name"></div>
+              <div class="provider-mx" id="provider-mx"></div>
+            </div>
+          </div>
         </div>
       </div>
       <p class="checks-title">Check results</p>
@@ -398,6 +413,21 @@ function renderSingleResult(data) {
   document.getElementById('result-domain').textContent = data.domain;
   document.getElementById('result-summary').textContent = data.summary;
   setTimeout(() => { document.getElementById('score-fill').style.width = data.score + '%'; }, 100);
+
+  // Email provider badge
+  if (data.email_provider && data.email_provider.name !== 'Unknown') {
+    const badge = document.getElementById('provider-badge');
+    const icon = document.getElementById('provider-icon');
+    const name = document.getElementById('provider-name');
+    const mx = document.getElementById('provider-mx');
+    icon.style.background = data.email_provider.color;
+    icon.textContent = data.email_provider.icon;
+    name.textContent = data.email_provider.name;
+    mx.textContent = data.email_provider.mx_hint.split(',')[0].trim();
+    badge.style.display = 'inline-flex';
+  } else {
+    document.getElementById('provider-badge').style.display = 'none';
+  }
   const grid = document.getElementById('checks-grid');
   grid.innerHTML = '';
   data.checks.forEach(check => {
@@ -639,6 +669,12 @@ function renderTable() {
 }
 
 function buildDetailHTML(d) {
+  const providerHtml = d.email_provider && d.email_provider.name !== 'Unknown' ? `
+    <div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;padding:5px 12px 5px 6px;border-radius:20px;border:1px solid var(--border);background:var(--surface)">
+      <div style="width:22px;height:22px;border-radius:50%;background:${d.email_provider.color};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white">${d.email_provider.icon}</div>
+      <span style="font-size:12px;color:var(--muted)">Provider:</span>
+      <span style="font-size:13px;font-weight:500;color:var(--text)">${d.email_provider.name}</span>
+    </div>` : '';
   const checksHtml = d.checks.map(c => {
     const sc = c.status === 'pass' ? 'var(--pass-bg)' : c.status === 'warning' ? 'var(--warn-bg)' : 'var(--fail-bg)';
     const tc = c.status === 'pass' ? 'var(--pass)' : c.status === 'warning' ? 'var(--warn)' : 'var(--fail)';
@@ -649,7 +685,7 @@ function buildDetailHTML(d) {
       ${c.fix ? `<div class="detail-fix"><strong>Fix:</strong> ${c.fix}</div>` : ''}
     </div>`;
   }).join('');
-  return `<div style="margin-bottom:8px;font-size:13px;font-weight:500">${d.domain} — Score ${d.score}/100 · ${d.summary}</div><div class="detail-checks">${checksHtml}</div>`;
+  return `<div style="margin-bottom:8px">${providerHtml}</div><div style="margin-bottom:8px;font-size:13px;font-weight:500">${d.domain} — Score ${d.score}/100 · ${d.summary}</div><div class="detail-checks">${checksHtml}</div>`;
 }
 
 // ─── PAGINATION ───────────────────────────────────────────
