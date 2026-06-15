@@ -29,6 +29,38 @@
       --radius: 12px; --radius-sm: 8px; --radius-xs: 6px;
       --font: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
       --mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --header-bg: rgba(9,9,11,0.85);
+      --grid-line: rgba(255,255,255,0.02);
+      --glow-color: rgba(99,102,241,0.08);
+      --score-bar-bg: rgba(255,255,255,0.06);
+      --check-fix-bg: rgba(255,255,255,0.03);
+      --detail-bg: rgba(255,255,255,0.025);
+    }
+
+    /* ── LIGHT THEME ── */
+    html.light {
+      --bg: #f8f8fb;
+      --bg-2: #f1f1f5;
+      --surface: #ffffff;
+      --surface-2: #f4f4f8;
+      --border: rgba(0,0,0,0.08);
+      --border-hover: rgba(0,0,0,0.15);
+      --text: #0a0a0f;
+      --text-2: #52525b;
+      --text-3: #a1a1aa;
+      --accent: #4f46e5;
+      --accent-dim: rgba(79,70,229,0.08);
+      --accent-glow: rgba(79,70,229,0.2);
+      --pass: #059669; --pass-bg: rgba(5,150,105,0.08); --pass-text: #065f46;
+      --warn: #d97706; --warn-bg: rgba(217,119,6,0.08); --warn-text: #92400e;
+      --fail: #dc2626; --fail-bg: rgba(220,38,38,0.08); --fail-text: #991b1b;
+      --blue: #4f46e5; --blue-bg: rgba(79,70,229,0.08);
+      --header-bg: rgba(248,248,251,0.9);
+      --grid-line: rgba(0,0,0,0.03);
+      --glow-color: rgba(79,70,229,0.05);
+      --score-bar-bg: rgba(0,0,0,0.06);
+      --check-fix-bg: rgba(0,0,0,0.02);
+      --detail-bg: rgba(0,0,0,0.015);
     }
 
     html { scroll-behavior: smooth; }
@@ -36,7 +68,7 @@
 
     /* ── HEADER ── */
     header {
-      background: rgba(9,9,11,0.85);
+      background: var(--header-bg);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
@@ -186,7 +218,7 @@
     .provider-mx { font-size: 10px; color: var(--text-3); font-family: var(--mono); margin-top: 1px; }
 
     /* ── SCORE BAR ── */
-    .score-bar { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; margin-top: 12px; overflow: hidden; }
+    .score-bar { height: 4px; background: var(--score-bar-bg); border-radius: 2px; margin-top: 12px; overflow: hidden; }
     .score-fill { height: 100%; border-radius: 2px; transition: width 1s cubic-bezier(.4,0,.2,1); background: linear-gradient(90deg, var(--accent), #a78bfa); }
 
     /* ── CHECK CARDS ── */
@@ -209,7 +241,7 @@
     .check-body h3 { font-size: 13.5px; font-weight: 600; margin-bottom: 2px; letter-spacing: -0.01em; }
     .check-body .check-message { font-size: 12.5px; color: var(--text-2); }
     .check-body .check-value { font-size: 10.5px; color: var(--text-3); margin-top: 4px; font-family: var(--mono); word-break: break-all; }
-    .check-fix { display: none; margin-top: 10px; padding: 10px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; font-size: 12.5px; color: var(--text-2); border-left: 2px solid var(--accent); }
+    .check-fix { display: none; margin-top: 10px; padding: 10px 12px; background: var(--check-fix-bg); border-radius: 6px; font-size: 12.5px; color: var(--text-2); border-left: 2px solid var(--accent); }
     .check-fix.show { display: block; }
     .check-fix strong { color: var(--text); }
 
@@ -276,7 +308,7 @@
     .bulk-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text-2); }
     .bulk-table tr:last-child td { border-bottom: none; }
     .bulk-table tr.expandable { cursor: pointer; transition: background 0.1s; }
-    .bulk-table tr.expandable:hover { background: rgba(255,255,255,0.025); }
+    .bulk-table tr.expandable:hover { background: var(--detail-bg); }
     .bulk-table tr.detail-row td { padding: 0; background: var(--bg); }
     .detail-inner { padding: 1rem 1.25rem; display: none; }
     .detail-inner.show { display: block; }
@@ -329,8 +361,8 @@
     .bg-grid {
       position: fixed; inset: 0; pointer-events: none; z-index: 0;
       background-image:
-        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
       background-size: 48px 48px;
       mask-image: radial-gradient(ellipse 80% 50% at 50% 0%, black 40%, transparent 100%);
       -webkit-mask-image: radial-gradient(ellipse 80% 50% at 50% 0%, black 40%, transparent 100%);
@@ -338,9 +370,31 @@
     .bg-glow {
       position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
       width: 800px; height: 400px; pointer-events: none; z-index: 0;
-      background: radial-gradient(ellipse, rgba(99,102,241,0.08) 0%, transparent 70%);
+      background: radial-gradient(ellipse, var(--glow-color) 0%, transparent 70%);
     }
     main, header, .tabs, footer { position: relative; z-index: 1; }
+
+    /* ── THEME TOGGLE ── */
+    .theme-toggle {
+      width: 36px; height: 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      background: var(--surface);
+      color: var(--text-2);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .theme-toggle:hover { border-color: var(--border-hover); color: var(--text); background: var(--surface-2); }
+    .theme-toggle svg { width: 15px; height: 15px; transition: transform 0.3s ease; }
+    .theme-toggle:hover svg { transform: rotate(20deg); }
+    .icon-moon { display: block; }
+    .icon-sun  { display: none; }
+    html.light .icon-moon { display: none; }
+    html.light .icon-sun  { display: block; }
+
+    .header-right { display: flex; align-items: center; gap: 8px; }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 640px) {
@@ -368,7 +422,23 @@
     </div>
     Email Health Scanner
   </a>
-  <a href="https://mellifluous-raindrop-a19bff.netlify.app/" class="nav-link" target="_blank">Email Verifier →</a>
+  <div class="header-right">
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" aria-label="Toggle theme">
+      <!-- Moon icon (shown in dark mode) -->
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+      <!-- Sun icon (shown in light mode) -->
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    </button>
+    <a href="https://mellifluous-raindrop-a19bff.netlify.app/" class="nav-link" target="_blank">Email Verifier →</a>
+  </div>
 </header>
 
 <div class="tabs">
@@ -972,6 +1042,17 @@ function resetBulk() {
   document.getElementById('paste-input').value = '';
   document.getElementById('file-input').value = '';
 }
+// ─── THEME TOGGLE ─────────────────────────────────────────
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light');
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+}
+
+// Apply saved theme on load
+(function() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light') document.documentElement.classList.add('light');
+})();
 </script>
 </body>
 </html>
