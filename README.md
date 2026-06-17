@@ -194,4 +194,4 @@ git pull origin main
 
 Suryateja Malluru
 
-Built using Rust, Axum, and modern web technologies.
+Built using Rust, Axum, and modern web technologies .
