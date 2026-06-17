@@ -35,7 +35,6 @@
       --score-bar-bg: rgba(255,255,255,0.06);
       --check-fix-bg: rgba(255,255,255,0.03);
       --detail-bg: rgba(255,255,255,0.025);
-      --hero-gradient:linear-gradient(135deg,#fafafa 0%,#a1a1aa 100%);
     }
 
     /* ── LIGHT THEME ── */
@@ -47,8 +46,8 @@
       --border: rgba(0,0,0,0.08);
       --border-hover: rgba(0,0,0,0.15);
       --text: #0a0a0f;
-      --text-2: #374151;
-      --text-3: #6b7280;
+      --text-2: #52525b;
+      --text-3: #a1a1aa;
       --accent: #4f46e5;
       --accent-dim: rgba(79,70,229,0.08);
       --accent-glow: rgba(79,70,229,0.2);
@@ -62,7 +61,6 @@
       --score-bar-bg: rgba(0,0,0,0.06);
       --check-fix-bg: rgba(0,0,0,0.02);
       --detail-bg: rgba(0,0,0,0.015);
-      --hero-gradient: linear-gradient(135deg, #000000 0%, #1e293b 100%);
     }
 
     html { scroll-behavior: smooth; }
@@ -114,9 +112,8 @@
       margin-bottom: 1rem;
       background: linear-gradient(135deg, #fafafa 0%, #a1a1aa 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      background: none; -webkit-text-fill-color: unset; color: var(--text);
     }
-    .hero p { font-size: 15px;  color: var(--text-2); max-width: 480px; margin: 0 auto; line-height: 1.7; }
+    .hero p { font-size: 15px; color: var(--text-2); max-width: 480px; margin: 0 auto; line-height: 1.7; }
 
     /* ── SCAN BOX ── */
     .scan-box {
@@ -305,17 +302,17 @@
     .filter-btn:hover:not(.active) { color: var(--text-2); border-color: var(--border-hover); }
 
     /* ── BULK TABLE ── */
-    .bulk-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1.25rem; }
-    .bulk-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .bulk-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; margin-bottom: 1.25rem; -webkit-overflow-scrolling: touch; }
+    .bulk-table { width: 100%; min-width: 720px; border-collapse: collapse; font-size: 13px; }
     .bulk-table th { text-align: left; padding: 9px 12px; font-size: 10.5px; font-weight: 600; color: var(--text-3); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.07em; background: rgba(255,255,255,0.02); }
     .bulk-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text-2); }
     .bulk-table tr:last-child td { border-bottom: none; }
     .bulk-table tr.expandable { cursor: pointer; transition: background 0.1s; }
     .bulk-table tr.expandable:hover { background: var(--detail-bg); }
     .bulk-table tr.detail-row td { padding: 0; background: var(--bg); }
-    .detail-inner { padding: 1rem 1.25rem; display: none; }
+    .detail-inner { padding: 1rem 1.25rem; display: none; position: sticky; left: 0; width: calc(100vw - 2.5rem); max-width: 800px; }
     .detail-inner.show { display: block; }
-    .detail-checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+    .detail-checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
     .detail-check { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.75rem 1rem; font-size: 12px; }
     .detail-check-name { font-weight: 600; margin-bottom: 3px; }
     .detail-check-msg { color: var(--text-3); font-size: 11px; }
@@ -410,7 +407,12 @@
       .search-input { width: 100%; }
       .filter-bar { flex-wrap: wrap; }
       header { padding: 0 1rem; }
+      .bulk-table-wrap { border-radius: var(--radius-sm); margin-left: -1rem; margin-right: -1rem; width: calc(100% + 2rem); border-left: none; border-right: none; }
+      .detail-inner { width: calc(100vw - 1.5rem); padding: 1rem; }
+      .detail-checks { grid-template-columns: 1fr; }
+      .scroll-hint { display: block; }
     }
+    .scroll-hint { display: none; font-size: 11px; color: var(--text-3); text-align: center; padding: 6px 0 0; }
   </style>
 </head>
 <body>
@@ -586,6 +588,7 @@
           <tbody id="bulk-tbody"></tbody>
         </table>
       </div>
+      <p class="scroll-hint">← Swipe to see all columns →</p>
 
       <div class="pagination" id="pagination"></div>
 
