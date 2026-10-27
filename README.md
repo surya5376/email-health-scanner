@@ -4,7 +4,7 @@ A modern email deliverability audit tool built with **Rust + Axum** that analyze
 
 The scanner checks SPF, DMARC, DKIM, MX records, blacklist status, and detects the email provider (Google Workspace, Microsoft 365, Zoho Mail, Proton Mail, Fastmail, Amazon SES, and more).
 
-## Features
+## Features 
 
 * SPF Record Validation
 * DMARC Policy Analysis
@@ -192,6 +192,6 @@ git pull origin main
 
 ## Author
 
-Suryateja Malluru
+SuryaTeja Malluru
 
 Built using Rust, Axum, and modern web technologies .
